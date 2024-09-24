@@ -74,6 +74,9 @@ const TodoList: React.FC = () => {
             <button onClick={() => router.push(`/todos/${todo.id}`)}>
               View Details
             </button>
+            <button onClick={() => router.push(`/todo/edit/${todo.id}`)}>
+              Edit
+            </button>
           </li>
         ))}
       </ul>
