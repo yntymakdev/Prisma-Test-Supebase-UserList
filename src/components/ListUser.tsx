@@ -1,61 +1,84 @@
 "use client";
-import axios from "axios";
-import React, { FC, useEffect } from "react";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-const ListUser = () => {
-  interface FormData {
-    username: string;
-    email: string;
-  }
+interface Todo {
+  id: number;
+  title: string;
+  description: string;
+  createdAt: string | null;
+}
 
-  const { register, handleSubmit, reset } = useForm();
-  const fetchUser = async () => {
-    try {
-      const { data } = await axios.get("api/v1/get-me");
-      console.log("🚀 ~ fetchUser ~ data:", data);
-    } catch (error) {
-      console.log("🚀 ~ fetchUser ~ error:", error);
-    }
-  };
+interface ApiResponse {
+  message: string;
+  data: Todo[];
+}
 
-  const onSubmit: SubmitHandler<FormData> = async (formData) => {
-    try {
-      console.log("🚀 ~ onSubmit ~ formData:", formData); // Log the form data
-      const response = await axios.post("api/v1/create-user", formData);
-      console.log("🚀 ~ onSubmit ~ response:", response.data);
-      reset(); // Reset the form after successful submission
-    } catch (error) {
-      console.error(
-        "🚀 ~ onSubmit ~ error:",
-        error.response?.data || error.message
-      );
-    }
-  };
+const TodoList: React.FC = () => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchUser();
+    const fetchTodos = async () => {
+      try {
+        const response = await fetch("/api/todo/get");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: ApiResponse = await response.json();
+        console.log("Fetched data:", data);
+
+        if (data && Array.isArray(data.data)) {
+          setTodos(data.data);
+        } else {
+          console.warn("Expected data.data to be an array, received:", data);
+          setTodos([]);
+        }
+      } catch (error: any) {
+        console.error("Failed to fetch todos:", error);
+        setError("Failed to fetch todos. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTodos();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Рассмотрите возможность использования спиннера загрузки
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (todos.length === 0) {
+    return <div>No todos found.</div>;
+  }
+
   return (
     <div>
-      <h1>User List</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input
-          {...register("username")}
-          type="username"
-          placeholder="username"
-          required
-        />
-        <input
-          {...register("email")}
-          type="email"
-          placeholder="email"
-          required
-        />
-        <button type="submit">Click</button>
-      </form>
+      <h1>Todo List</h1>
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            <h2>{todo.title || "Title not available"}</h2>
+            <p>{todo.description || "Description not available"}</p>
+            <small>
+              {todo.createdAt
+                ? new Date(todo.createdAt).toLocaleString()
+                : "Date not available"}
+            </small>
+            <button onClick={() => router.push(`/todos/${todo.id}`)}>
+              View Details
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default ListUser;
+export default TodoList;
