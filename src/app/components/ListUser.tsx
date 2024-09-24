@@ -46,6 +46,26 @@ const TodoList: React.FC = () => {
     fetchTodos();
   }, []);
 
+  const deleteTodo = async (id: number) => {
+    if (confirm("Are you sure you want to delete this todo?")) {
+      try {
+        const response = await fetch(`/api/todo/delete/${id}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Обновляем состояние, удаляя задачу из списка
+        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      } catch (error: any) {
+        console.error("Failed to delete todo:", error);
+        setError("Failed to delete todo. Please try again later.");
+      }
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>; // Рассмотрите возможность использования спиннера загрузки
   }
@@ -74,9 +94,10 @@ const TodoList: React.FC = () => {
             <button onClick={() => router.push(`/todos/${todo.id}`)}>
               View Details
             </button>
-            <button onClick={() => router.push(`/todo/edit/${todo.id}`)}>
+            <button onClick={() => router.push(`/editTodo/${todo.id}`)}>
               Edit
             </button>
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
           </li>
         ))}
       </ul>

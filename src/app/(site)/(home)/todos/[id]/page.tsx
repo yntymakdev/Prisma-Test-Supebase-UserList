@@ -27,7 +27,6 @@ const TodoDetail: React.FC = () => {
       console.log("Fetching todo with ID:", id); // Лог для отладки
 
       try {
-        // Запрос на получение данных о Todo по ID
         const response = await fetch(`/api/todo/${id}`);
         console.log("Response status:", response.status); // Лог состояния ответа
 
@@ -36,7 +35,6 @@ const TodoDetail: React.FC = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Обрабатываем полученные данные
         const data: { success: boolean; todo: Todo } = await response.json();
         console.log("Response data:", data); // Логирование данных ответа
 

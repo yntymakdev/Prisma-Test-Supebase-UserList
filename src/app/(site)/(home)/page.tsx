@@ -1,16 +1,15 @@
-import CreateTodo from "@/components/CreateTodo";
-import EditTodo from "@/components/EditTodo";
-import TodoPage from "@/components/editTodo/[id]/page";
-import ListUser from "@/components/ListUser";
+import CreateTodo from "@/app/components/CreateTodo";
+import EditTodo from "@/app/components/editTodo/[id]/EditTodo";
+import ListUser from "@/app/components/ListUser";
 import React from "react";
 
 const page = () => (
   <>
     <CreateTodo />
     <ListUser />
-    <TodoPage
+    <EditTodo
       params={{
-        id: "",
+        id: "1",
       }}
     />
   </>
